@@ -155,7 +155,7 @@ class World:
                 return "recovered"
 
         infected_around = 0
-        if 
+        if
 
 
     def movement_options(self, creature):
