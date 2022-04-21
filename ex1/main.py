@@ -2,6 +2,8 @@ import random
 from argparse import ArgumentParser
 import matplotlib.pyplot as plt
 import numpy as np
+import pygame
+
 
 # initializes
 
@@ -11,7 +13,7 @@ parser.add_argument('-N', type=int, help='Number of creatures', default=30000)
 parser.add_argument('-R', type=float, help='Percent of fast creatures', default=0.2)
 parser.add_argument('-D', type=float, help='Percent of initial infected', default=0.001)
 parser.add_argument('-X', type=int, help='Number of generations in which a creature stays infected', default=3)
-parser.add_argument('-PA', type=float, help='Probability of infection when infected creatures <T', default=0.8 )
+parser.add_argument('-PA', type=float, help='Probability of infection when infected creatures <T', default=0.8)
 parser.add_argument('-PB', type=float, help='Probability of infection when infected creatures >T', default=0.05)
 parser.add_argument('-T', type=float, help='The threshold value for changing P (PA <-> PB)', default=0.02)
 args = parser.parse_args()
@@ -213,11 +215,21 @@ world = World()
 generation = 0
 X_AXE = [generation]
 Y_AXE = [world.infected_num]
+pygame.init()
+surface = pygame.display.set_mode((410, 410))
 while (world.infected_num != 0):
     world.next_gen()
     generation += 1
     X_AXE.append(generation)
     Y_AXE.append(world.infected_num)
+    for i in range(int(200)):
+        for j in range(int(200)):
+            # Draw creatures on the screen.
+            offset = 5
+            a = i * 2 + offset
+            b = j * 2 + offset
+            pygame.draw.rect(surface, world.get_location(i, j).get_color_from_status(), (a, b, 2, 2))
+    pygame.display.flip()
     print("gen:", generation, "num:", world.infected_num)
 
 # Plot lists 'x' and 'y'
@@ -227,3 +239,9 @@ plt.plot(X_AXE, Y_AXE)
 plt.xlabel('X-axis Label')
 plt.ylabel('Y_AXE-axis Label')
 plt.show()
+
+
+
+
+
+
