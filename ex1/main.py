@@ -1,20 +1,19 @@
 import random
 from argparse import ArgumentParser
-
+import matplotlib.pyplot as plt
 import numpy as np
-import pygame as pyg
 
 # initializes
 
 # get user input
 parser = ArgumentParser()
-parser.add_argument('-N', type=int, help='Number of creatures', default=10000)
+parser.add_argument('-N', type=int, help='Number of creatures', default=30000)
 parser.add_argument('-R', type=float, help='Percent of fast creatures', default=0.2)
-parser.add_argument('-D', type=float, help='Percent of initial infected', default=0.01)
-parser.add_argument('-X', type=int, help='Number of generations in which a creature stays infected', default=10)
-parser.add_argument('-PA', type=float, help='Probability of infection when infected creatures <T', default=0.9)
-parser.add_argument('-PB', type=float, help='Probability of infection when infected creatures >T', default=0.1)
-parser.add_argument('-T', type=float, help='The threshold value for changing P (PA <-> PB)', default=0.2)
+parser.add_argument('-D', type=float, help='Percent of initial infected', default=0.001)
+parser.add_argument('-X', type=int, help='Number of generations in which a creature stays infected', default=3)
+parser.add_argument('-PA', type=float, help='Probability of infection when infected creatures <T', default=0.8 )
+parser.add_argument('-PB', type=float, help='Probability of infection when infected creatures >T', default=0.05)
+parser.add_argument('-T', type=float, help='The threshold value for changing P (PA <-> PB)', default=0.02)
 args = parser.parse_args()
 
 # TODO: CHECKING INPUTS
@@ -40,7 +39,7 @@ class Creature:
         self.location.next_gen_checkin(self)
         self.location.next_gen_update()
         self.next_gen_location = None
-        self.gen_for_healing = 0
+        self.gen_for_healing = X
 
     def next_gen_move(self, location, status):
         self.status = status
@@ -83,11 +82,12 @@ class World:
         self.board_size = board_size
         self.board_rows = board_size[0]
         self.board_cols = board_size[1]
-        self.board = [[Location(i, j) for j in range(self.board_rows)] for i in range(self.board_cols)]
+        self.board = [[Location(i, j) for j in range(self.board_cols)] for i in range(self.board_rows)]
         self.infected_num = int(N * D)
         self.creatures = self.initialize_creatures()
         self.locations_to_update = set([])
         self.P = PA if D < T else PB
+        print(self.P)
 
     def initialize_creatures(self):
         creatures = []
@@ -100,17 +100,16 @@ class World:
         # set random list for the infected cells
         infected_lst = ["infected" for inf in range(self.infected_num)] + ["healthy" for heal in
                                                                            range(N - self.infected_num)]
-        random.shuffle(infected_lst)
-
         # set random indexes for the creatures
         rows_idx_lst = [i for i in range(self.board_rows)]
-        random.shuffle(rows_idx_lst)
         cols_idx_lst = [j for j in range(self.board_cols)]
-        random.shuffle(cols_idx_lst)
+        indexes = set()
+        while len(indexes) < N:
+            indexes.add((random.choice(rows_idx_lst), random.choice(cols_idx_lst)))
 
         # create the creatures
-        for creature_args in zip(rows_idx_lst[:N], cols_idx_lst[:N], infected_lst, fast_lst):
-            c = Creature(self.get_location(creature_args[0], creature_args[1]), creature_args[2], creature_args[3])
+        for creatur_args in zip(indexes, infected_lst, fast_lst):
+            c = Creature(self.get_location(creatur_args[0][0], creatur_args[0][1]), creatur_args[1], creatur_args[2])
             creatures.append(c)
         # return
         return creatures
@@ -119,88 +118,112 @@ class World:
         return self.board[i][j]
 
     def next_gen(self):
-        random.shuffle(self.creatures)
-        for c in self.creatures:
-            self.creature_next_gen(c)
+        # random.shuffle(self.creatures)
+        is_creatures_ready_for_next_gen = [False]
+        while (not all(is_creatures_ready_for_next_gen)):
+            is_creatures_ready_for_next_gen = []
+            for c in self.creatures:
+                self.creature_next_loc(c)
+                is_creatures_ready_for_next_gen.append(c.next_gen_location is not None)
+        self.next_gen_update()
+
+    def next_gen_update(self):
         self.update_all_locations()
         self.locations_to_update = set([])
         for c in self.creatures:
             c.next_gen_update()
-        self.P = PA if self.infected_num / N < T else PB
+        self.P = PA if (self.infected_num / N) < T else PB
+        print(self.P)
 
     def update_all_locations(self):
         for loc in self.locations_to_update:
             loc.next_gen_update()
 
-    def creature_next_gen(self, creature):
+    def creature_next_loc(self, creature):
         if creature.next_gen_location is None:
-            next_status = ""
-            while True:
+            creature_row_idx = creature.location.row_idx
+            creature_col_idx = creature.location.col_idx
+            move_options = self.movement_options(creature)
+            next_status = self.creature_next_status(creature, move_options)
+            for movement in move_options:
                 creature_row_idx = creature.location.row_idx
                 creature_col_idx = creature.location.col_idx
-                for step in range(creature.speed):
-                    vert_mov_opt, horz_mov_opt = self.movement_options(creature_row_idx, creature_col_idx)
-                    if next_status=="":
-                        next_status = self.creature_next_status(creature, horz_mov_opt, vert_mov_opt)
-                    vert_mov = random.choice(vert_mov_opt)
-                    horz_mov = random.choice(horz_mov_opt)
-                    creature_row_idx += vert_mov
-                    creature_col_idx += horz_mov
-                    next_loc = self.get_location(creature_row_idx, creature_col_idx)
-                if next_loc.contain is not None:
+                vert_mov = movement[0]
+                horz_mov = movement[1]
+                creature_row_idx += vert_mov
+                creature_col_idx += horz_mov
+                # if it is a fast creature there is going to another iteration, so set new mov_opt for next step
+                next_loc = self.get_location(creature_row_idx, creature_col_idx)
+                if(next_loc.contain is not None) and (next_loc.contain is not creature):
                     if next_loc.contain.next_gen_location is None:
-                        self.creature_next_gen(next_loc.contain)
+                        continue
                 if next_loc.next_gen_contain is None:
                     creature.next_gen_move(next_loc, next_status)
                     self.locations_to_update.add(creature.location)
                     self.locations_to_update.add(creature.next_gen_location)
-                    return
 
-    def creature_next_status(self, creature, horz_mov_opt, vert_mov_opt):
+    def creature_next_status(self, creature, movement_options):
         if creature.status == "recovered":
             return "recovered"
         if creature.status == "infected":
             creature.gen_for_healing -= 1
             if creature.gen_for_healing == 0:
-                return "infected"
-            else:
                 self.infected_num -= 1
                 return "recovered"
+            else:
+                return "infected"
 
         infected_around = 0
-        for y in vert_mov_opt:
-            for x in horz_mov_opt:
-                if self.get_location(creature.location.row_idx + y, creature.location.col_idx + x):
+        for [y, x] in movement_options:
+            neighbor = self.get_location(creature.location.row_idx + y, creature.location.col_idx + x).contain
+            if neighbor is not None:
+                if neighbor.status == "infected":
                     infected_around += 1
-        probability_staying_healthy = pow(self.P, infected_around)
-
-        if np.random.binomial(1, probability_staying_healthy) == 0:
-            creature.gen_for_healing = X
+        if infected_around == 0:
+            return "healthy"
+        elif np.random.binomial(1, pow(1 - self.P,infected_around))== 0:
             self.infected_num += 1
             return "infected"
         else:
             return "healthy"
 
-    def movement_options(self, row_idx, col_idx):
+    def movement_options(self, creature):
+        row_idx = creature.location.row_idx
+        col_idx = creature.location.col_idx
+        steps = creature.speed
         # vertical movement options
-        vertical_movement_options = [-1, 0, 1]
-        if row_idx == 0:
-            vertical_movement_options.remove(-1)
-        elif row_idx == self.board_rows - 1:
-            vertical_movement_options.remove(1)
+        vertical_movement_options = [-steps, 0, steps]
+        if row_idx - steps < 0:
+            vertical_movement_options.remove(-steps)
+        elif row_idx + steps > self.board_rows - 1:
+            vertical_movement_options.remove(steps)
 
         # horizontal movement options
-        horizontal_movement_options = [-1, 0, 1]
-        if col_idx == 0:
-            horizontal_movement_options.remove(-1)
-        elif col_idx == self.board_cols - 1:
-            horizontal_movement_options.remove(1)
+        horizontal_movement_options = [-steps, 0, steps]
+        if col_idx - steps < 0:
+            horizontal_movement_options.remove(-steps)
+        elif col_idx + steps > self.board_cols - 1:
+            horizontal_movement_options.remove(steps)
 
         # return
-        return vertical_movement_options, horizontal_movement_options
+        return [[y, x] for y in vertical_movement_options for x in horizontal_movement_options]
 
 
 world = World()
-world.next_gen()
-world.next_gen()
-world.next_gen()
+generation = 0
+X_AXE = [generation]
+Y_AXE = [world.infected_num]
+while (world.infected_num != 0):
+    world.next_gen()
+    generation += 1
+    X_AXE.append(generation)
+    Y_AXE.append(world.infected_num)
+    print("gen:", generation, "num:", world.infected_num)
+
+# Plot lists 'x' and 'y'
+plt.plot(X_AXE, Y_AXE)
+
+# Plot axes labels and show the plot
+plt.xlabel('X-axis Label')
+plt.ylabel('Y_AXE-axis Label')
+plt.show()
