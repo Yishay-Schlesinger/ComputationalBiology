@@ -135,6 +135,10 @@ class World:
         self.board = [[Location(i, j) for j in range(self.board_cols)] for i in range(self.board_rows)]
         # number of infected
         self.infected_num = int(N * D)
+        # number of healthy
+        self.healthy_num = N - self.infected_num
+        # number of recovered
+        self.recovered_num = 0
         # initialize creature
         self.creatures = self.initialize_creatures()
         # after first updates of going to next generation, I want to do another update only for the needed locations,
@@ -246,6 +250,7 @@ class World:
             creature.gen_for_healing -= 1
             if creature.gen_for_healing == 0:
                 self.infected_num -= 1
+                self.recovered_num += 1
                 return "recovered"
             else:
                 return "infected"
@@ -263,6 +268,7 @@ class World:
         # each sick neighbor need to be consider, so usr the probability of staying healthy in power of the sicks number
         elif np.random.binomial(1, pow(1 - self.P, infected_around)) == 0:
             self.infected_num += 1
+            self.healthy_num -= 1
             return "infected"
         else:
             return "healthy"
