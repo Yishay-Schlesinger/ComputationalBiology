@@ -13,13 +13,14 @@ def import_or_install(package):
         pip.main(['install', package])
 
 
-[import_or_install(package_name) for package_name in ['random', 'argparse', 'matplotlib', 'numpy', 'pygame']]
+[import_or_install(package_name) for package_name in ['random', 'argparse', 'matplotlib', 'numpy', 'pygame', 'sys']]
 
 import random
 from argparse import ArgumentParser
 import matplotlib.pyplot as plt
 import numpy as np
 import pygame
+import sys
 
 # get user input, or use the default
 parser = ArgumentParser()
@@ -59,6 +60,12 @@ if PB < 0 or PB > 1:
     raise Exception(f'PB need to be -  1 < PB < 0')
 if T < 0 or T > 1:
     raise Exception(f'T need to be -  1 < T < 0')
+
+
+def check_if_click_exit(e):
+    if e.type == pygame.QUIT:
+        pygame.quit()
+        sys.exit()
 
 """
 Creature class
@@ -293,6 +300,7 @@ class World:
         # return
         return [[y, x] for y in vertical_movement_options for x in horizontal_movement_options]
 
+
 # set a new World object
 world = World()
 generation = 0
@@ -300,19 +308,29 @@ X_AXE = [generation]
 Y_AXE = [world.infected_num]
 # initial pygame
 pygame.init()
-surface = pygame.display.set_mode((410, 410))
+surface = pygame.display.set_mode((600, 470))
+color1 = pygame.Color('black')
 # move generation till there is 0 infected
 while world.infected_num != 0:
+    for event in pygame.event.get():
+        check_if_click_exit(event)
     world.next_gen()
     generation += 1
     X_AXE.append(generation)
     Y_AXE.append(world.infected_num)
+    font = pygame.font.Font(None, 20)
+    pygame.draw.rect(surface, (224, 224, 224), (0, 0, 720, 50))
+    surface.blit(font.render("Generation: " + str(generation), True, color1), (50, 20))
+    surface.blit(font.render("Infected: " + str(world.infected_num) + "(Red)", True, color1), (150, 20))
+    surface.blit(font.render("Healthy: " + str(world.healthy_num) + "(Green)", True, color1), (290, 20))
+    surface.blit(font.render("Recovered: " + str(world.recovered_num) + "(Blue)", True, color1), (440, 20))
     for i in range(int(200)):
         for j in range(int(200)):
             # Draw creatures on the screen.
-            offset = 5
-            a = i * 2 + offset
-            b = j * 2 + offset
+            offset_x = 100
+            offset_y = 60
+            a = i * 2 + offset_x
+            b = j * 2 + offset_y
             pygame.draw.rect(surface, world.get_location(i, j).color, (a, b, 2, 2))
     pygame.display.flip()
 
