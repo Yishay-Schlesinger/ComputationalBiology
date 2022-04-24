@@ -1,5 +1,9 @@
-import pip
+# Liav Trabelsy - 315870345
+# Yishay Schlesinger -208438119
 
+# explanation of how we avoiding collision is in creature_next_loc function
+
+import pip
 
 # make sure all the needed modules are installed, if not install them
 def import_or_install(package):
@@ -310,6 +314,6 @@ while world.infected_num != 0:
 plt.plot(X_AXE, Y_AXE)
 
 # Plot axes labels and show the plot
-plt.xlabel('X-axis Label')
-plt.ylabel('Y_AXE-axis Label')
+plt.xlabel('Generation')
+plt.ylabel('Number of Infected')
 plt.show()
