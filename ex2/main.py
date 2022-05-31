@@ -118,7 +118,6 @@ if __name__ == '__main__':
                     fitness_scores.append(sol_fitness_score)
 
                 # print information
-                print("Generation", gen_num, "Max Score:", max(fitness_scores), "Mean Score:", mean(fitness_scores))
                 # add information to the list
                 tmp_info_gen_num.append(gen_num)
                 tmp_info_max.append(max(fitness_scores))
@@ -147,16 +146,16 @@ if __name__ == '__main__':
                                 lines[greater[0] * 2][greater[1] * 2 - 1] = "<"
                         if greater[1] == greater[3]:
                             if greater[0] < greater[2]:
-                                lines[greater[1] * 2][greater[2] * 2 - 1] = "v"
+                                lines[greater[2]*2 -1][greater[2] * 2] = "v"
                             if greater[0] > greater[2]:
-                                lines[greater[1] * 2][greater[0] * 2 - 1] = "^"
+                                lines[greater[1] * 2 -1][greater[0] * 2] = "^"
                     # print the board
                     [print("".join(l)) for l in lines]
                     # set new info and sign to finish this algorithm
                     finish = True
                     info_max = tmp_info_max
-                    info_gen_num = info_gen_num
-                    info_mean = info_mean
+                    info_gen_num = tmp_info_gen_num
+                    info_mean = tmp_info_mean
                     break
 
                 # the channels of the numpy matrix to take for the next generation
