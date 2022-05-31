@@ -5,6 +5,33 @@ import numpy as np
 import random
 from statistics import mean
 
+
+def printing(solutions, fitness_scores, matrix_size, greater_sign_index):
+    lines = []
+    # add ' ' and lines to make it look better
+    for row in solutions[fitness_scores.index(max(fitness_scores))]:
+        line1 = list(row)
+        [line1.insert(i, ' ') for i in range(1, matrix_size * 2, 2)]
+        line1 = [str(line1[i]) for i in range(matrix_size * 2)]
+        line2 = [' ' for space in range(matrix_size * 2)]
+        lines.append(line1)
+        lines.append(line2)
+    # add the greater sign where it is needed
+    for greater in greater_sign_index:
+        if greater[0] == greater[2]:
+            if greater[1] < greater[3]:
+                lines[greater[0] * 2][greater[3] * 2 - 1] = ">"
+            if greater[1] > greater[3]:
+                lines[greater[0] * 2][greater[1] * 2 - 1] = "<"
+        if greater[1] == greater[3]:
+            if greater[0] < greater[2]:
+                lines[greater[2] * 2 - 1][greater[1] * 2] = "v"
+            if greater[0] > greater[2]:
+                lines[greater[0] * 2 - 1][greater[1] * 2] = "^"
+    # print the board
+    [print("".join(l)) for l in lines]
+
+
 if __name__ == '__main__':
     # get file_path from user
     file_path = input("Write the path for the input file: ")
@@ -39,8 +66,8 @@ if __name__ == '__main__':
 
     # I give each algorithm 20 opportunities to solve the problem (each opportunity up to 2000 generation),
     # if the algorithm is not solved, return information on the loop with the best max score value
-    for algo in ["Regular", "Lemark", "Darvin"]:
-
+    # for algo in ["Regular", "Lemark", "Darvin"]:
+    for algo in ["Darvin"]:
         # information for results analysis
         info_gen_num = []
         info_mean = []
@@ -67,6 +94,8 @@ if __name__ == '__main__':
                     # swap with the value in the given_digit place
                     sol[given_digit[0], given_digit[1]], sol[given_digit[0], given_digit_loc] = \
                         sol[given_digit[0], given_digit_loc], sol[given_digit[0], given_digit[1]]
+
+            #printing(solutions, [0 for i in range(population_size)], matrix_size, greater_sign_index)
 
             # start generation
             gen_num = 0
@@ -117,6 +146,8 @@ if __name__ == '__main__':
                     # add the score to the list
                     fitness_scores.append(sol_fitness_score)
 
+                # printing(solutions, [0 for i in range(population_size)], matrix_size, greater_sign_index)
+
                 # print information
                 # add information to the list
                 tmp_info_gen_num.append(gen_num)
@@ -128,29 +159,7 @@ if __name__ == '__main__':
                     print("FINISHED", algo)
                     # print the matrix
                     print("THE MATRIX:")
-                    lines = []
-                    # add ' ' and lines to make it look better
-                    for row in solutions[fitness_scores.index(best_score)]:
-                        line1 = list(row)
-                        [line1.insert(i, ' ') for i in range(1, matrix_size * 2, 2)]
-                        line1 = [str(line1[i]) for i in range(matrix_size*2)]
-                        line2 = [' ' for space in range(matrix_size * 2)]
-                        lines.append(line1)
-                        lines.append(line2)
-                    # add the greater sign where it is needed
-                    for greater in greater_sign_index:
-                        if greater[0] == greater[2]:
-                            if greater[1] < greater[3]:
-                                lines[greater[0] * 2][greater[3] * 2 - 1] = ">"
-                            if greater[1] > greater[3]:
-                                lines[greater[0] * 2][greater[1] * 2 - 1] = "<"
-                        if greater[1] == greater[3]:
-                            if greater[0] < greater[2]:
-                                lines[greater[2]*2 -1][greater[2] * 2] = "v"
-                            if greater[0] > greater[2]:
-                                lines[greater[1] * 2 -1][greater[0] * 2] = "^"
-                    # print the board
-                    [print("".join(l)) for l in lines]
+                    printing(solutions, [0 for i in range(population_size)], matrix_size, greater_sign_index)
                     # set new info and sign to finish this algorithm
                     finish = True
                     info_max = tmp_info_max
@@ -212,6 +221,8 @@ if __name__ == '__main__':
                             # swap -> mutation
                             next_gen[i][row_mut, col_mut1], next_gen[i][row_mut, col_mut2] = \
                                 next_gen[i][row_mut, col_mut2], next_gen[i][row_mut, col_mut1]
+
+                # printing(solutions, [0 for i in range(population_size)], matrix_size, greater_sign_index)
 
                 # set the new_generation to solutions
                 solutions = np.array(next_gen)
