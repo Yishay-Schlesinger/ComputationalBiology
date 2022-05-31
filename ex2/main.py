@@ -66,8 +66,8 @@ if __name__ == '__main__':
 
     # I give each algorithm 20 opportunities to solve the problem (each opportunity up to 2000 generation),
     # if the algorithm is not solved, return information on the loop with the best max score value
-    # for algo in ["Regular", "Lemark", "Darvin"]:
-    for algo in ["Darvin"]:
+    for algo in ["Regular", "Lemark", "Darvin"]:
+    #for algo in ["Darvin"]:
         # information for results analysis
         info_gen_num = []
         info_mean = []
