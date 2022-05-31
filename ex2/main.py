@@ -223,8 +223,8 @@ if __name__ == '__main__':
                     if len(info_max) > 0:
                         if max(info_max) < max(tmp_info_max):
                             info_max = tmp_info_max
-                            info_gen_num = info_gen_num
-                            info_mean = info_mean
+                            info_gen_num = tmp_info_gen_num
+                            info_mean = tmp_info_mean
             if finish:
                 break
 
