@@ -64,9 +64,14 @@ if __name__ == '__main__':
     # combine the above and get 'best score'= the score that we want to get and then we will know we finished
     best_score = matrix_size * matrix_size + num_of_greater_sign
 
+    # Information for each algo
+    info_Regular_algo = []
+    info_Darvin_algo = []
+    info_Lemark_algo = []
+
     # I give each algorithm 20 opportunities to solve the problem (each opportunity up to 2000 generation),
     # if the algorithm is not solved, return information on the loop with the best max score value
-    for algo in ["Regular", "Lemark", "Darvin"]:
+    for algo in ["Regular", "Darvin","Lemark"]:
     #for algo in ["Darvin"]:
         # information for results analysis
         info_gen_num = []
@@ -95,7 +100,7 @@ if __name__ == '__main__':
                     sol[given_digit[0], given_digit[1]], sol[given_digit[0], given_digit_loc] = \
                         sol[given_digit[0], given_digit_loc], sol[given_digit[0], given_digit[1]]
 
-            #printing(solutions, [0 for i in range(population_size)], matrix_size, greater_sign_index)
+            # printing(solutions, [0 for i in range(population_size)], matrix_size, greater_sign_index)
 
             # start generation
             gen_num = 0
@@ -138,7 +143,8 @@ if __name__ == '__main__':
                     sol_fitness_score = 0
                     # get for each index 1 point if there is not duplicate
                     for j in range(matrix_size):
-                        sol_fitness_score += len(np.unique(solutions[s][:, j]))
+                        sol_fitness_score +=\
+                            sum([1 for v in solutions[s][:, j] if list(solutions[s][:, j]).count(v) == 1])
                     # get for each greater sign 1 point if it is correct
                     for greater_idx in greater_sign_index:
                         if solutions[s][greater_idx[0]][greater_idx[1]] > solutions[s][greater_idx[2]][greater_idx[3]]:
@@ -156,9 +162,8 @@ if __name__ == '__main__':
 
                 # check if finished
                 if best_score in fitness_scores:
-                    print("FINISHED", algo)
                     # print the matrix
-                    print("THE MATRIX:")
+                    print("THE MATRIX OF " + algo + ":")
                     printing(solutions, fitness_scores, matrix_size, greater_sign_index)
                     # set new info and sign to finish this algorithm
                     finish = True
@@ -238,11 +243,23 @@ if __name__ == '__main__':
                             info_mean = tmp_info_mean
             if finish:
                 break
+        if finish:
+            print(algo, "SOLVED THE PROBLEM :)")
+        else:
+            print(algo, "FAILED TO SOLVE THE PROBLEM :(")
+            print("Generations", gen_num)
+        if algo == "Regular":
+            info_Regular_algo = [info_gen_num,info_max,info_mean]
+        if algo == "Darvin":
+            info_Darvin_algo = [info_gen_num,info_max,info_mean]
+        if algo == "Lemark":
+            info_Lemark_algo = [info_gen_num, info_max, info_mean]
 
-        # LIAV DO NOT DELETE NOTHING ABOVE
-        # WRITE HERE THE CODE FOR THE GRAPHS
-        # YES IT IS REALLY UGLY I DONT CARE
-        # NOTICE: 'info_gen_num for' x - axis , 'info_mean' y - axis / 'info_max' - y axis
-        # NOTICE: this code (here the comment with you future code) is going to run 3 times for each algorithm
-        #         you can check the current algorithm with 'algo'
-        # TO DELETE LINE 121?
+
+    # LIAV DO NOT DELETE NOTHING ABOVE
+    # WRITE HERE THE CODE FOR THE GRAPHS
+    # YES IT IS REALLY UGLY I DONT CARE
+    # NOTICE: 'info_gen_num for' x - axis , 'info_mean' y - axis / 'info_max' - y axis
+    # NOTICE: this code (here the comment with you future code) is going to run 3 times for each algorithm
+    #         you can check the current algorithm with 'algo'
+    # TO DELETE LINE 121?
