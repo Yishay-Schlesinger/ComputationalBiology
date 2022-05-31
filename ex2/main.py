@@ -66,8 +66,8 @@ if __name__ == '__main__':
 
     # I give each algorithm 20 opportunities to solve the problem (each opportunity up to 2000 generation),
     # if the algorithm is not solved, return information on the loop with the best max score value
-    for algo in ["Regular", "Lemark", "Darvin"]:
-    #for algo in ["Darvin"]:
+    #for algo in ["Regular", "Lemark", "Darvin"]:
+    for algo in ["Darvin"]:
         # information for results analysis
         info_gen_num = []
         info_mean = []
@@ -117,7 +117,7 @@ if __name__ == '__main__':
                     # take for the optimization only greater signs in the rows and only if its index
                     # is not the same as given_digit
                     grater_sign_for_optimization = [greater for greater in greater_sign_index
-                                                    if (greater[0] == greater[1]) and (greater[0], greater[1]) not in
+                                                    if (greater[0] == greater[2]) and (greater[0], greater[1]) not in
                                                     given_digits_index_dict and (greater[2], greater[3]) not in
                                                     given_digits_index_dict]
                     for sol in solutions:
@@ -138,7 +138,7 @@ if __name__ == '__main__':
                     sol_fitness_score = 0
                     # get for each index 1 point if there is not duplicate
                     for j in range(matrix_size):
-                        sol_fitness_score += matrix_size - (matrix_size - len(np.unique(solutions[s][:, j])))
+                        sol_fitness_score += len(np.unique(solutions[s][:, j]))
                     # get for each greater sign 1 point if it is correct
                     for greater_idx in greater_sign_index:
                         if solutions[s][greater_idx[0]][greater_idx[1]] > solutions[s][greater_idx[2]][greater_idx[3]]:
@@ -159,7 +159,7 @@ if __name__ == '__main__':
                     print("FINISHED", algo)
                     # print the matrix
                     print("THE MATRIX:")
-                    printing(solutions, [0 for i in range(population_size)], matrix_size, greater_sign_index)
+                    printing(solutions, fitness_scores, matrix_size, greater_sign_index)
                     # set new info and sign to finish this algorithm
                     finish = True
                     info_max = tmp_info_max
