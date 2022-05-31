@@ -4,6 +4,7 @@
 import numpy as np
 import random
 from statistics import mean
+import matplotlib.pyplot as plt
 
 
 def printing(solutions, fitness_scores, matrix_size, greater_sign_index):
@@ -35,7 +36,8 @@ def printing(solutions, fitness_scores, matrix_size, greater_sign_index):
 if __name__ == '__main__':
     # get file_path from user
     file_path = input("Write the path for the input file: ")
-    # get input
+
+# get input
     with open(file_path) as input_file:
         inp = input_file.readlines()
     # set input in constant
@@ -78,8 +80,8 @@ if __name__ == '__main__':
         info_mean = []
         info_max = []
 
-        # I give each algorithm 20 opportunities to solve the problem
-        for trying in range(20):
+        # I give each algorithm 10 opportunities to solve the problem
+        for trying in range(10):
 
             # set the solutions for the first generation
             solutions = []
@@ -113,7 +115,7 @@ if __name__ == '__main__':
             tmp_info_max = []
 
             # run till -
-            while gen_num <= 2000:
+            while gen_num <= 1000:
                 # in the darvin algo we dont want that the optimization will effect so create copy for later
                 if algo == "Darvin":
                     solutions_copy = np.array([np.array(solutions[i]) for i in range(len(solutions))])
@@ -235,19 +237,23 @@ if __name__ == '__main__':
                 gen_num += 1
 
                 # update info if needed
-                if gen_num == 2000:
+                if gen_num == 1000:
                     if len(info_max) > 0:
                         if max(info_max) < max(tmp_info_max):
                             info_max = tmp_info_max
                             info_gen_num = tmp_info_gen_num
                             info_mean = tmp_info_mean
+                    else:
+                        info_max = tmp_info_max
+                        info_gen_num = tmp_info_gen_num
+                        info_mean = tmp_info_mean
             if finish:
                 break
         if finish:
             print(algo, "SOLVED THE PROBLEM :)")
         else:
             print(algo, "FAILED TO SOLVE THE PROBLEM :(")
-        print("Generations", gen_num)
+        print("Generations", gen_num - 1, ", MAX SCORE:", max(fitness_scores))
         print('')
         if algo == "Regular":
             info_Regular_algo = [info_gen_num,info_max,info_mean]
@@ -264,3 +270,19 @@ if __name__ == '__main__':
     # NOTICE: this code (here the comment with you future code) is going to run 3 times for each algorithm
     #         you can check the current algorithm with 'algo'
     # TO DELETE LINE 121?
+
+    plt.plot(info_Regular_algo[0], info_Regular_algo[1], label="Regular", color='green')
+    plt.plot(info_Darvin_algo[0], info_Darvin_algo[1], label="Darvin", color='blue')
+    plt.plot(info_Lemark_algo[0], info_Lemark_algo[1], label="Lemark", color='yellow')
+    plt.xlabel('num of gen')
+    plt.ylabel('max')
+    plt.legend()
+    plt.show()
+
+    plt.plot(info_Regular_algo[0], info_Regular_algo[2], label="Regular", color='green')
+    plt.plot(info_Darvin_algo[0], info_Darvin_algo[2], label="Darvin", color='blue')
+    plt.plot(info_Lemark_algo[0], info_Lemark_algo[2], label="Lemark", color='yellow')
+    plt.xlabel('num of gen')
+    plt.ylabel('mean')
+    plt.legend()
+    plt.show()
