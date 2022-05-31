@@ -247,7 +247,7 @@ if __name__ == '__main__':
             print(algo, "SOLVED THE PROBLEM :)")
         else:
             print(algo, "FAILED TO SOLVE THE PROBLEM :(")
-            print("Generations", gen_num)
+        print("Generations", gen_num)
         if algo == "Regular":
             info_Regular_algo = [info_gen_num,info_max,info_mean]
         if algo == "Darvin":
